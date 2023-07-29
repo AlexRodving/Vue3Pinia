@@ -1,22 +1,25 @@
 <template>
-  <helloworld msg="Hello" @counters="countEmit" />
+  <!-- <helloworld msg="Hello" @counters="countEmit" /> -->
   <!-- Основной контент -->
   <!-- <div :[attr]="login">
       <h1>About</h1>
   </div> -->
-  <button @click="counter">{{ count }}</button>
-  <div class="post" v-for="post in posts" :key="post.id">
+  <div class="main">
+    <RouterLink to="/">Home</RouterLink>
+    <button @click="counter">Клик: {{ count }}</button>
+    <div class="post" v-for="post in posts" :key="post.id">
     <h1>{{ post.title }}</h1>
     <p>{{ post.text }}</p>
+    </div>
   </div>
 </template>
 
 <script>
-import ComponentsHello from '../components/ComponentsHello.vue'
+// import ComponentsHello from '../components/ComponentsHello.vue'
 // import компонентов
 export default{
   components: { // Подключаемые компоненты
-      'helloworld': ComponentsHello
+    //   'helloworld': ComponentsHello
   },
   data () {    // Переменные
       return {

@@ -1,0 +1,17 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.main{
+    width: 1200px;
+    height: max-content;
+    margin: 20px auto 0 auto;
+    padding: 20px 20px 20px 20px;
+    border: solid 2px black;
+    border-radius: 10px;
+}
+
+.box{
+    margin-top: 40px;
+}
