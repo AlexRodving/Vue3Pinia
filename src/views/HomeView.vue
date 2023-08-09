@@ -24,6 +24,7 @@
       <p>Использование: HomeView, counter.js</p>
       <p>Подключить в main.js</p>
       <br><hr>
+      <button @click="clack">{{ counterStore.count }}</button>
     </div>
     <div class="box about">
       <p>Описание свойст компонента Vue3(Option Api) в AboutView.vue</p>
@@ -49,13 +50,19 @@ import { RouterLink } from 'vue-router';
         posts: [],
         counterStore: useCounterStore(), //Pinia
         //После подключение мы получаем доступ ко всем параметрам стора
-        //использование, через точку как к вложеным полям обьекта 
+        //использование, через точку как к вложеным полям обьекта
       }
     },
     methods: {
+      increment(){
+
+      },
       thisIncrement(e){
         this.count = e;
       },
+      clack(){
+        this.counterStore.count++
+      }
     },
   }
 </script>

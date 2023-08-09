@@ -10,6 +10,7 @@
     <div class="post" v-for="post in posts" :key="post.id">
     <h1>{{ post.title }}</h1>
     <p>{{ post.text }}</p>
+    <button @click="del()">Delete</button>
     </div>
   </div>
 </template>
@@ -28,12 +29,25 @@ export default{
           lastName: '',
           attr: 'class',
           posts: [ ],
-          count: 0
+          count: 0,
+          crf: '',
+          obj:{
+            title: "Наш Пост5",
+            anons: "Мы создадим многопользовательский блог",
+            text: "Мы создадим многопользовательский блог для клуба любителей задач Python Bytes. Вместе со стандартным пакетом Django будем использовать модули django-crispy-forms и Pillow. Реализуем всю функциональность, необходимую для:\r\n\r\n* регистрации и авторизации участников;\r\n* автоматического создания пользовательских профилей;\r\n* заполнения и изменения информации в профилях;\r\n* автоматического сжатия изображений для аватарок;\r\n* создания, редактирования и удаления записей со стороны фронтенда;\r\n* пагинации и вывода записей на страницах авторов.",
+            date: "2023-05-02T19:16:50Z"
+          }
       }
   },
   methods: { // Наши функции
       create: function(){
           console.log('Hello!')
+      },
+      getCookie(name) {
+        let matches = document.cookie.match(new RegExp(
+          "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
       },
       async getPosts(){
          
@@ -43,6 +57,14 @@ export default{
       },
       countEmit(count){
           this.count++
+      },
+      del: async function(){
+        console.log(this.crf.token)
+        await fetch('http://127.0.0.1:8000/api/posts/', {
+          method: "POST",
+          headers: {'Content-Type': 'application/json;charset=utf-8'},
+          body: JSON.stringify(this.obj)
+        })
       }
 
   },
@@ -69,7 +91,10 @@ export default{
   async beforeMount() { // Компонент будет монтирован
       const data = await fetch('http://127.0.0.1:8000/api/posts/')
       this.posts = await data.json()
-  }
+      // console.log(this.posts)
+      const d1 = await fetch('http://127.0.0.1:8000/api/get_csrf')
+      this.crf = await d1.json()
+    }
 }
 </script>
 
