@@ -8,9 +8,9 @@
     <RouterLink to="/">Home</RouterLink>
     <button @click="counter">Клик: {{ count }}</button>
     <div class="post" v-for="post in posts" :key="post.id">
-    <h1>{{ post.title }}</h1>
-    <p>{{ post.text }}</p>
-    <button @click="del()">Delete</button>
+      <h1>{{ post.title }}</h1>
+      <p>{{ post.text }}</p>
+      <button @click="del(post.id)">Delete</button>
     </div>
   </div>
 </template>
@@ -58,13 +58,11 @@ export default{
       countEmit(count){
           this.count++
       },
-      del: async function(){
-        console.log(this.crf.token)
-        await fetch('http://127.0.0.1:8000/api/posts/', {
-          method: "POST",
-          headers: {'Content-Type': 'application/json;charset=utf-8'},
-          body: JSON.stringify(this.obj)
-        })
+      del: async function(id){
+        await fetch(`http://127.0.0.1:8000/api/posts/${id}`, { method: "DELETE"})
+        
+        const i = this.posts.findIndex(n => n.id == id)
+        this.posts.splice(i, 1)
       }
 
   },
@@ -92,8 +90,8 @@ export default{
       const data = await fetch('http://127.0.0.1:8000/api/posts/')
       this.posts = await data.json()
       // console.log(this.posts)
-      const d1 = await fetch('http://127.0.0.1:8000/api/get_csrf')
-      this.crf = await d1.json()
+      // const d1 = await fetch('http://127.0.0.1:8000/api/get_csrf')
+      // this.crf = await d1.json()
     }
 }
 </script>
