@@ -4,13 +4,36 @@
   <!-- <div :[attr]="login">
       <h1>About</h1>
   </div> -->
+  <RouterLink to="/">Home</RouterLink>
+  <button @click="counter">Клик: {{ count }}</button>
   <div class="main">
-    <RouterLink to="/">Home</RouterLink>
-    <button @click="counter">Клик: {{ count }}</button>
-    <div class="post" v-for="post in posts" :key="post.id">
-      <h1>{{ post.title }}</h1>
-      <p>{{ post.text }}</p>
-      <button @click="del(post.id)">Delete</button>
+    <div class="box1">
+      <div class="post" v-for="post in posts" :key="post.id">
+        <h1>{{ post.title }}</h1>
+        <p>{{ post.text }}</p>
+        <button @click="del(post.id)">Delete</button>
+        <button @click="editPost(post)">Edit</button>
+      </div>
+    </div>
+    <div class="box2">
+      <label>
+        <span>Заголовок: </span>
+        <input v-model="title">
+      </label>
+      <label>
+        <span>Анонс: </span>
+        <input v-model="anons">
+      </label>
+      <label>
+        <span>Текст: </span>
+        <input v-model="text">
+      </label>
+      <label>
+        <span>Дата: </span>
+        <input v-model="date" type="datetime-local">
+      </label>
+      <button @click.prevent="saveEdit">Сохранить Изминения</button>
+      <button @click.prevent="pushPost()">Отправить</button>
     </div>
   </div>
 </template>
@@ -24,26 +47,23 @@ export default{
   },
   data () {    // Переменные
       return {
-          title: 'About',
+          title: '',
+          anons: '',
+          text: '',
+          date: '',
           firrstName: '',
           lastName: '',
           attr: 'class',
           posts: [ ],
           count: 0,
           crf: '',
-          obj:{
-            title: "Наш Пост5",
-            anons: "Мы создадим многопользовательский блог",
-            text: "Мы создадим многопользовательский блог для клуба любителей задач Python Bytes. Вместе со стандартным пакетом Django будем использовать модули django-crispy-forms и Pillow. Реализуем всю функциональность, необходимую для:\r\n\r\n* регистрации и авторизации участников;\r\n* автоматического создания пользовательских профилей;\r\n* заполнения и изменения информации в профилях;\r\n* автоматического сжатия изображений для аватарок;\r\n* создания, редактирования и удаления записей со стороны фронтенда;\r\n* пагинации и вывода записей на страницах авторов.",
-            date: "2023-05-02T19:16:50Z"
-          }
       }
   },
   methods: { // Наши функции
       create: function(){
           console.log('Hello!')
       },
-      getCookie(name) {
+      getCookie(name) {                                       //GET CSRF
         let matches = document.cookie.match(new RegExp(
           "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
         ));
@@ -58,12 +78,41 @@ export default{
       countEmit(count){
           this.count++
       },
-      del: async function(id){
+      pushPost: async function(){     //POST
+        const newPost = {            //Создаем объект
+          title: this.title,
+          anons: this.anons,
+          text: this.text,
+          date: this.date
+        }
+        this.posts.push(newPost)  //Пушим его в массив, для отрисовки без перезагрузки
+        const res = await fetch('http://127.0.0.1:8000/api/posts/', {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          },
+          body: JSON.stringify(newPost)
+        })
+        const data = await res.json()
+        if(data.id)alert("Запушили!") //Получаем ответ, проверяем, выводим alert
+      },
+      editPost: function(post){      //Кнопка edit перенос post в форму для изменения
+        this.title = post.title
+        this.anons = post.anons
+        this.text = post.text
+        this.date = this.formatDate(post.date)
+      },
+      del: async function(id){              //DELETE
         await fetch(`http://127.0.0.1:8000/api/posts/${id}`, { method: "DELETE"})
-        
+
         const i = this.posts.findIndex(n => n.id == id)
-        this.posts.splice(i, 1)
-      }
+        this.posts.splice(i, 1)      //Отрезаем наш пост от массива для отрисовки без перезагрузки
+      },
+      formatDate(date) {   //Преобразуем дату в нужный формат для type="datetime-local"
+        const dateObj = new Date(date);
+        const formattedDate = dateObj.toISOString().slice(0, 16);
+        return formattedDate;
+      },
 
   },
   computed: { // Метод который содержит обьект с вычисляемыми свойствами
@@ -90,7 +139,7 @@ export default{
       const data = await fetch('http://127.0.0.1:8000/api/posts/')
       this.posts = await data.json()
       // console.log(this.posts)
-      // const d1 = await fetch('http://127.0.0.1:8000/api/get_csrf')
+      // const d1 = await fetch('http://127.0.0.1:8000/api/get_csrf') //GET CSRF
       // this.crf = await d1.json()
     }
 }
@@ -98,6 +147,18 @@ export default{
 
 <!-- Стили, если scoped, то только для компонента -->
 <style scoped> 
+
+.main{
+  display: flex;
+  justify-content: space-around;
+}
+
+.box2{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-end;
+}
 .post{
   width: 400px;
   height: max-content;
