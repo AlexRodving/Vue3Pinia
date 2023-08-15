@@ -32,7 +32,7 @@
         <span>Дата: </span>
         <input v-model="date" type="datetime-local">
       </label>
-      <button @click.prevent="saveEdit">Сохранить Изминения</button>
+      <button @click.prevent="saveEdit()">Сохранить Изминения</button>
       <button @click.prevent="pushPost()">Отправить</button>
     </div>
   </div>
@@ -47,6 +47,7 @@ export default{
   },
   data () {    // Переменные
       return {
+          _id: '',
           title: '',
           anons: '',
           text: '',
@@ -97,10 +98,29 @@ export default{
         if(data.id)alert("Запушили!") //Получаем ответ, проверяем, выводим alert
       },
       editPost: function(post){      //Кнопка edit перенос post в форму для изменения
+        this._id = post.id
         this.title = post.title
         this.anons = post.anons
         this.text = post.text
         this.date = this.formatDate(post.date)
+      },
+      saveEdit: async function(){    //PUT Кнопка Сохранить Изменения 
+        console.log(this._id)
+        await fetch(`http://127.0.0.1:8000/api/posts/${this._id}`,{
+          method: "PUT",
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          },
+          body: JSON.stringify({title: this.title, anons: this.anons, text: this.text, date: this.date})
+        })
+        const i = this.posts.findIndex(n => n.id == this._id)
+        this.posts.splice(i, 1)
+        this.posts.push({ id:this._id, title: this.title, anons: this.anons, text: this.text, date: this.date})
+        this._id = ''
+        this.title = ''
+        this.anons = ''
+        this.text = ''
+        this.date = ''
       },
       del: async function(id){              //DELETE
         await fetch(`http://127.0.0.1:8000/api/posts/${id}`, { method: "DELETE"})
